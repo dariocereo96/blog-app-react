@@ -1,22 +1,19 @@
-
-import React, { useState } from 'react';
-import Login from './components/Login';
-import axios from 'axios';
-import NavBar from './components/NavBar';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './views/main/Home';
+import Login from './views/auth/Login';
+// import CreateArticles from './views/admin/CreateArticles';
+import LayoutMain from './views/main/LayoutMain';
 
 function App() {
-
-  const getData=()=>{
-     axios.get('http://127.0.0.1:8000/api/articles', {
-     responseType: 'json'
-   }).then((data)=>console.log(data.data));
-  } 
-
   return (
-    <div className="App container">
-      {/* <NavBar/> */}
-      <Login/>
-    </div>
+    <BrowserRouter>
+        <Routes> 
+        	<Route path="/login" element={<Login/>}/>
+          <Route path="/" element={<LayoutMain/>}>
+            <Route index element={<Home/>}/>
+          </Route>
+        </Routes>
+    </BrowserRouter>
   );
 }
 
