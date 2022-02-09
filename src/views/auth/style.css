@@ -1,0 +1,32 @@
+
+.bg-own{
+	background-color: #FAFAFA;
+}
+
+.bg-white{
+	background-color: #fff;
+}
+
+.w-95{
+	width: 95%;
+}
+
+.mw-700{
+	max-width: 700px;
+}
+
+.mw-900{
+	max-width: 750px;
+}
+
+.fs-7{
+	font-size: 0.9rem;
+}
+
+.top-58{
+ top: 60px;
+}
+
+a{
+	text-decoration: none;
+}

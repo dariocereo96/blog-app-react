@@ -1,142 +1,73 @@
-import { createContext, useEffect, useState } from 'react';
-import { login as authLogin, logout as authLogout, register as authRegister } from '../services/authService';
+import { createContext, useState} from 'react';
+import axios from 'axios';
+import authentication from '../services/authService.js';
 
-//Contexto Authentication
-export const AuthContext = createContext();
+export const authContext = createContext();
 
 const initialState = {
-  isAuthenticated: false,
-  token: "",
-  message: "",
-  error:"",
-  profile:{},
+	errorMessage:"",
+	isAuthenticated:false,
+	isLoading:false,
+	token:"",
+	profile:{},
 }
 
-//Proveedor
 export const AuthProvider = ({ children }) => {
-  console.log("Se renderizo el context");
-  const [state, setState] = useState(initialState);
 
-  useEffect(() => {
+	const [state,setState] = useState(initialState);
 
-    const token = getToken();
-    const profile = getProfile();
+	const loginAuth = ( data ) => {
+		setState({
+			...state,
+			errorMessage:"",
+			isLoading:true,
+		});
+		authentication.login(data)
+		.then((response) => {
+			console.log(response);
+			setState({
+				...state,
+				isAuthenticated:true,
+				isLoading:false,
+				errorMessage:"",
+			});
+		})
+		.catch((err) => {
+			if(err.response){
+				console.log(err.response);
+				setState({
+					...state,
+					errorMessage:err.response.data.errors.info,
+					isLoading:false
+				});
+			}
+			else if(err.request){
+				console.log(err.request);
+				setState({
+					...state,
+					errorMessage:"No se pudo conectar al servidor",
+					isLoading:false
+				});
+				console.log(state);
+			}
+			else{
+				console.log("Ocurrio un problema");
+				setState({
+					...state,
+					errorMessage:"No se pudo conectar al servidor",
+					isLoading:false
+				});
+			}
+		});
+	}
 
-    if (token) {
-      setState({
-        ...state,
-        isAuthenticated: true,
-        token: token,
-        profile:JSON.parse(profile),
-      });
-    }
-  }, []);
+	const registerAuth = ( data ) => {
 
-  const login = (credentials) => {
+	}
 
-    setState({ ...state, error: "" });
-
-    authLogin(credentials)
-      .then((data) => {
-        setState({
-          isAuthenticated: true,
-          profile:data.profile,
-          token: data.token,
-          error: "",
-        });
-        setToken(data.token);
-        setProfile(data.profile);
-        console.log(data);
-      })
-      .catch((err) => {
-        if (err.response) {
-          setState({
-            ...initialState,
-            error: err.response.data.errors.info,
-          });
-        }
-        else if (err.request) {
-          setState({
-            ...initialState,
-            error: "No se pudo conectar al servidor",
-          });
-        }
-        else {
-          setState({
-            ...state,
-            error: "No se pudo conectar al servidor",
-          });
-        }
-      });
-  }
-
-  const logout = () => {
-    console.log("saliendo.....");
-    authLogout(state.token)
-    .then((data)=>{
-      setState({
-        ...state,
-        message:data.message,
-        isAuthenticated:false,
-        token:"",
-        profile:{},
-      });
-      deleteToken();
-      deleteProfile();
-    })
-    .catch((err) => {
-        if (err.response) {
-          setState({
-            ...state,
-            error:"",
-          });
-          console.error(err.response.data);
-        }
-
-        else if (err.request) {
-          setState({
-            ...state,
-            error: "No se pudo conectar al servidor",
-          });
-        }
-        else {
-          setState({
-            ...state,
-            error: "No se pudo conectar al servidor",
-          });
-        }
-      });
-  }
-
-  const setToken = (token) => {
-    localStorage.setItem("token", token);
-  }
-
-  const getToken = () => {
-    return localStorage.getItem("token");
-  }
-
-  const deleteToken = () => {
-    localStorage.removeItem('token');
-  }
-
-  const setProfile = (profile) => {
-    localStorage.setItem("profile",JSON.stringify(profile));
-  }
-
-  const getProfile = () => {
-    return localStorage.getItem("profile");
-  }
-
-  const deleteProfile = () => {
-    localStorage.removeItem('profile');
-  }
-
-  return (
-    <AuthContext.Provider value={{ state, login , logout}}>
-      {children}
-    </AuthContext.Provider>
-  )
+	return (
+		<authContext.Provider value={{loginAuth,state}}>
+			{children}
+		</authContext.Provider>
+	)
 }
-
-
